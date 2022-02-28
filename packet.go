@@ -1,5 +1,12 @@
 package gomul
 
+const PING = "ping"
+const PONG = "pong"
+
+type HasHeartbeatInterface interface {
+	IsHeartbeat() bool
+}
+
 type Packet struct {
 	id   int64
 	body string
