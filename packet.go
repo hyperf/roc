@@ -5,10 +5,14 @@ type Packet struct {
 	body string
 }
 
-func (p *Packet) getId() int64 {
+func (p *Packet) GetId() int64 {
 	return p.id
 }
 
-func (p *Packet) getBody() string {
+func (p *Packet) GetBody() string {
 	return p.body
+}
+
+func (p *Packet) IsHeartbeat() bool {
+	return p.GetId() == 0 && (p.GetBody() == PING || p.GetBody() == PONG)
 }
