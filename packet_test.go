@@ -14,7 +14,7 @@ func Test_Packet_New(t *testing.T) {
 }
 
 func Test_Packet_Is_Heartbeat(t *testing.T) {
-	c.Convey("The packet::ssHeartBeat with heartbeat must be equal with true.", t, func() {
+	c.Convey("The packet::IsHeartBeat with heartbeat must be equal with true.", t, func() {
 		packet := &Packet{0, PONG}
 		c.So(packet.IsHeartbeat(), c.ShouldEqual, true)
 

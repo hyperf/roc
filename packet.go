@@ -8,11 +8,11 @@ type HasHeartbeatInterface interface {
 }
 
 type Packet struct {
-	id   int64
+	id   uint32
 	body string
 }
 
-func (p *Packet) GetId() int64 {
+func (p *Packet) GetId() uint32 {
 	return p.id
 }
 
