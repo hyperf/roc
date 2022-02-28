@@ -15,15 +15,16 @@ type Packer struct {
 }
 
 func (p *Packer) Pack(packet *Packet) []byte {
-	head := make([]byte, 4)
 	length := len(packet.GetBody())
+	head := make([]byte, 8)
 	binary.BigEndian.PutUint32(head, uint32(length+4))
+	binary.BigEndian.PutUint32(head[4:], packet.GetId())
 
-	bs := make([]byte, 4)
-	binary.BigEndian.PutUint32(bs, packet.GetId())
+	var buffer = bytes.Buffer{}
+	buffer.Write(head)
+	buffer.WriteString(packet.GetBody())
 
-	body := []byte(packet.GetBody())
-	return bytesCombine(head, bs, body)
+	return buffer.Bytes()
 }
 
 func (p *Packer) UnPack(bs []byte) *Packet {
