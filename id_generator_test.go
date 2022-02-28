@@ -6,10 +6,10 @@ import (
 )
 
 func Test_IdGenerator_Generate(t *testing.T) {
-	c.Convey("Generate must be safe.", t, func() {
+	c.Convey("Generate must be coroutine safe.", t, func() {
 		generator := &IdGenerator{id: 0}
 		c.So(generator.Generate(), c.ShouldEqual, 1)
-		ch := make(chan uint32, 200)
+		ch := make(chan uint32, 100)
 		for i := 0; i < 10; i++ {
 			go func() {
 				for i := 0; i < 10; i++ {
