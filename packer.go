@@ -3,7 +3,6 @@ package gomul
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 )
 
 type PackerInterface interface {
@@ -25,11 +24,7 @@ func (p *Packer) Pack(packet *Packet) []byte {
 
 func (p *Packer) UnPack(bs []byte) *Packet {
 	id := binary.BigEndian.Uint32(bs[0:4])
-
-	fmt.Println(id)
-
 	body := string(bs[4:])
-
 	return &Packet{id, body}
 }
 
