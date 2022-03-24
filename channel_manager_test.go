@@ -1,7 +1,6 @@
 package gomul
 
 import (
-	"fmt"
 	c "github.com/smartystreets/goconvey/convey"
 	"testing"
 	"time"
@@ -18,7 +17,6 @@ func Test_ChannelManager_New(t *testing.T) {
 		go func(id uint32) {
 			packet := &Packet{id, "Hello World"}
 			ret := packer.Pack(packet)
-			fmt.Println(ret, packet)
 			channel <- ret
 		}(id)
 

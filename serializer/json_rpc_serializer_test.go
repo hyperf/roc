@@ -8,7 +8,7 @@ import (
 func Test_Serializer_Serialize_And_UnSerialize(t *testing.T) {
 	c.Convey("Pack and UnPack must be interchangeable.", t, func() {
 		serializer := &JsonRPCSerializer{}
-		data := &JsonRPCData{
+		data := &JsonRPCData[string, string]{
 			Id:      "123",
 			Path:    "/json_rpc/index",
 			Data:    "Hello World",
@@ -19,7 +19,9 @@ func Test_Serializer_Serialize_And_UnSerialize(t *testing.T) {
 		json := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":\"Hello World\",\"context\":\"\"}"
 		c.So(ret, c.ShouldEqual, json)
 
-		data2, _ := serializer.UnSerialize(json)
+		data2 := &JsonRPCData[string, string]{}
+		serializer.UnSerialize(json, data2)
+
 		c.So(data2.Id, c.ShouldEqual, data.Id)
 		c.So(data2.Path, c.ShouldEqual, data.Path)
 		c.So(data2.Data, c.ShouldEqual, data.Data)
