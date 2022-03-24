@@ -31,7 +31,6 @@ func Test_ChannelManager_New(t *testing.T) {
 func Test_ChannelManager_Flush(t *testing.T) {
 	c.Convey("The channel will return nil when ChannelManager flush.", t, func() {
 		manager := NewChannelManager()
-		//packer := &Packer{}
 		generator := &IdGenerator{}
 		id := generator.Generate()
 		channel := manager.get(id, true)
@@ -40,6 +39,24 @@ func Test_ChannelManager_Flush(t *testing.T) {
 			time.Sleep(1)
 			manager.flush()
 		}(manager)
+
+		ret, ok := <-channel
+		c.So(ok, c.ShouldEqual, false)
+		c.So(ret, c.ShouldEqual, nil)
+	})
+}
+
+func Test_ChannelManager_Close(t *testing.T) {
+	c.Convey("The channel will return nil when ChannelManager close.", t, func() {
+		manager := NewChannelManager()
+		generator := &IdGenerator{}
+		id := generator.Generate()
+		channel := manager.get(id, true)
+
+		go func(manager *ChannelManager, id uint32) {
+			time.Sleep(1)
+			manager.close(id)
+		}(manager, id)
 
 		ret, ok := <-channel
 		c.So(ok, c.ShouldEqual, false)
