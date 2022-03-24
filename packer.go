@@ -1,7 +1,6 @@
 package gomul
 
 import (
-	"bytes"
 	"encoding/binary"
 )
 
@@ -26,12 +25,4 @@ func (p *Packer) UnPack(bs []byte) *Packet {
 	id := binary.BigEndian.Uint32(bs[0:4])
 	body := string(bs[4:])
 	return &Packet{id, body}
-}
-
-func bytesCombine(bs ...[]byte) []byte {
-	var buffer = bytes.Buffer{}
-	for i := 0; i < len(bs); i++ {
-		buffer.Write(bs[i])
-	}
-	return buffer.Bytes()
 }
