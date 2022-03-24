@@ -12,6 +12,13 @@ type Packet struct {
 	body string
 }
 
+func NewPacket(id uint32, body string) *Packet {
+	return &Packet{
+		id:   id,
+		body: body,
+	}
+}
+
 func (p *Packet) GetId() uint32 {
 	return p.id
 }
