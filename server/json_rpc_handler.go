@@ -2,11 +2,12 @@ package server
 
 import (
 	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/exception"
 	"github.com/hyperf/roc/formatter"
 	"net"
 )
 
-type JsonRPCHandler func(route *formatter.JsonRPCRoute, packet *roc.Packet, server *TcpServer) (any, error)
+type JsonRPCHandler func(route *formatter.JsonRPCRoute, packet *roc.Packet, server *TcpServer) (any, exception.ExceptionInterface)
 
 func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 	return func(conn net.Conn, packet *roc.Packet, server *TcpServer) {
@@ -17,13 +18,14 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 
 		serializer.UnSerialize(body, route)
 
-		ret, err := callback(route, packet, server)
+		ret, exception := callback(route, packet, server)
 		var response any
-		if err != nil {
+		if exception != nil {
 			response = &formatter.JsonRPCErrorResponse[any]{
 				Id: route.Id,
 				Error: &formatter.JsonRPCError{
-					Message: err.Error(),
+					Code:    exception.GetCode(),
+					Message: exception.GetMessage(),
 				},
 				Context: nil,
 			}
