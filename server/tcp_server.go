@@ -33,6 +33,8 @@ func (s *TcpServer) Start() {
 		return
 	}
 
+	fmt.Println("Json RPC Server listening at " + s.Address)
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
