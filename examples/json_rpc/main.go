@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/examples/json_rpc/action"
 	"github.com/hyperf/roc/exception"
@@ -20,12 +19,9 @@ func main() {
 	r := SetUpRouters()
 
 	handler := server.NewTcpServerHandler(func(route *formatter.JsonRPCRoute, packet *roc.Packet, server *server.TcpServer) (any, exception.ExceptionInterface) {
-
-		fmt.Println(route, packet)
-
 		action, ok := r.Routes[route.Path]
 		if !ok {
-			return nil, &exception.Exception{Code: 404, Message: "The route is not defined."}
+			return nil, &exception.Exception{Code: exception.NOT_FOUND, Message: "The route is not defined."}
 		}
 
 		return action.Handle(packet, server.Serializer)

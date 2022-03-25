@@ -21,3 +21,7 @@ func (e *Exception) GetMessage() string {
 func (e *Exception) GetCode() int {
 	return e.Code
 }
+
+func NewDefaultException(message string) ExceptionInterface {
+	return &Exception{Code: SERVER_ERROR, Message: message}
+}
