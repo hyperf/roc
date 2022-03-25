@@ -1,4 +1,4 @@
-package gomul
+package roc
 
 import (
 	c "github.com/smartystreets/goconvey/convey"

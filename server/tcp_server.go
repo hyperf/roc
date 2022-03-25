@@ -3,13 +3,13 @@ package server
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/hyperf/gomul"
+	"github.com/hyperf/roc"
 	"net"
 )
 
 type TcpServer struct {
 	Address string
-	Handler func(conn net.Conn, packet *gomul.Packet)
+	Handler func(conn net.Conn, packet *roc.Packet)
 }
 
 func (s TcpServer) Start() {
@@ -47,7 +47,7 @@ func (s TcpServer) handle(conn net.Conn) {
 			return
 		}
 
-		packer := &gomul.Packer{}
+		packer := &roc.Packer{}
 		packet := packer.UnPack(buf)
 
 		s.Handler(conn, packet)

@@ -1,4 +1,4 @@
-package gomul
+package roc
 
 type ChannelManager struct {
 	channels map[uint32]chan []byte

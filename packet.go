@@ -1,4 +1,4 @@
-package gomul
+package roc
 
 const PING = "ping"
 const PONG = "pong"
