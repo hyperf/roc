@@ -1,25 +1,25 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/server"
 	"net"
+	"time"
 )
 
 func main() {
-	serv := &server.TcpServer{
-		Address: "127.0.0.1:9601",
-		Handler: func(conn net.Conn, packet *roc.Packet) {
-			ret := "Hello " + packet.GetBody()
+	serv := server.NewTcpServer("127.0.0.1:9601", func(conn net.Conn, packet *roc.Packet, s *server.TcpServer) {
+		body := packet.GetBody()
+		if body == "timeout" {
+			time.Sleep(time.Second * 5)
+		}
 
-			p := roc.NewPacket(packet.GetId(), ret)
+		ret := "Hello " + body
 
-			fmt.Println(p)
-			packer := &roc.Packer{}
-			conn.Write(packer.Pack(p))
-		},
-	}
+		p := roc.NewPacket(packet.GetId(), ret)
+
+		conn.Write(s.Packer.Pack(p))
+	})
 
 	serv.Start()
 }

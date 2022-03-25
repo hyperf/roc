@@ -1,14 +1,15 @@
 package serializer
 
 import (
+	"github.com/hyperf/roc/response"
 	c "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
 func Test_Serializer_Serialize_And_UnSerialize(t *testing.T) {
 	c.Convey("Pack and UnPack must be interchangeable.", t, func() {
-		serializer := &JsonRPCSerializer{}
-		data := &JsonRPCData[string, string]{
+		serializer := &JsonSerializer{}
+		data := &response.JsonRPCResponse[string, string]{
 			Id:      "123",
 			Path:    "/json_rpc/index",
 			Data:    "Hello World",
@@ -19,7 +20,7 @@ func Test_Serializer_Serialize_And_UnSerialize(t *testing.T) {
 		json := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":\"Hello World\",\"context\":\"\"}"
 		c.So(ret, c.ShouldEqual, json)
 
-		data2 := &JsonRPCData[string, string]{}
+		data2 := &response.JsonRPCResponse[string, string]{}
 		serializer.UnSerialize(json, data2)
 
 		c.So(data2.Id, c.ShouldEqual, data.Id)
@@ -31,13 +32,13 @@ func Test_Serializer_Serialize_And_UnSerialize(t *testing.T) {
 
 func Test_Serializer_Serialize_And_UnSerialize_For_T(t *testing.T) {
 	c.Convey("Pack and UnPack must be interchangeable.", t, func() {
-		serializer := &JsonRPCSerializer{}
+		serializer := &JsonSerializer{}
 		type DataFoo struct {
 			Id   int    `json:"id"`
 			Name string `json:"name"`
 		}
 
-		data := &JsonRPCData[*DataFoo, string]{
+		data := &response.JsonRPCResponse[*DataFoo, string]{
 			Id:      "123",
 			Path:    "/json_rpc/index",
 			Data:    &DataFoo{1, "Hyperf"},
@@ -48,7 +49,7 @@ func Test_Serializer_Serialize_And_UnSerialize_For_T(t *testing.T) {
 		json := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":{\"id\":1,\"name\":\"Hyperf\"},\"context\":\"Hello World\"}"
 		c.So(ret, c.ShouldEqual, json)
 
-		data2 := &JsonRPCData[*DataFoo, string]{}
+		data2 := &response.JsonRPCResponse[*DataFoo, string]{}
 		serializer.UnSerialize(json, data2)
 
 		c.So(data2.Id, c.ShouldEqual, data.Id)

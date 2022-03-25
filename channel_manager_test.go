@@ -34,7 +34,7 @@ func Test_ChannelManager_Flush(t *testing.T) {
 		channel := manager.Get(id, true)
 
 		go func(manager *ChannelManager) {
-			time.Sleep(1)
+			time.Sleep(time.Second)
 			manager.Flush()
 		}(manager)
 
@@ -52,7 +52,7 @@ func Test_ChannelManager_Close(t *testing.T) {
 		channel := manager.Get(id, true)
 
 		go func(manager *ChannelManager, id uint32) {
-			time.Sleep(1)
+			time.Sleep(time.Second)
 			manager.Close(id)
 		}(manager, id)
 

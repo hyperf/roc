@@ -4,15 +4,29 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/serializer"
 	"net"
 )
 
+type Handler func(conn net.Conn, packet *roc.Packet, server *TcpServer)
+
 type TcpServer struct {
-	Address string
-	Handler func(conn net.Conn, packet *roc.Packet)
+	Address    string
+	Handler    Handler
+	Packer     *roc.Packer
+	Serializer serializer.SerializerInterface
 }
 
-func (s TcpServer) Start() {
+func NewTcpServer(addr string, handler Handler) *TcpServer {
+	return &TcpServer{
+		Address:    addr,
+		Handler:    handler,
+		Packer:     &roc.Packer{},
+		Serializer: &serializer.JsonSerializer{},
+	}
+}
+
+func (s *TcpServer) Start() {
 	listener, err := net.Listen("tcp", s.Address)
 	if err != nil {
 		fmt.Println("Error listening", err.Error())
@@ -30,7 +44,7 @@ func (s TcpServer) Start() {
 	}
 }
 
-func (s TcpServer) handle(conn net.Conn) {
+func (s *TcpServer) handle(conn net.Conn) {
 	for {
 		buf := make([]byte, 4)
 		_, err := conn.Read(buf)
@@ -49,7 +63,19 @@ func (s TcpServer) handle(conn net.Conn) {
 
 		packer := &roc.Packer{}
 		packet := packer.UnPack(buf)
+		if packet.IsHeartbeat() {
+			go s.sendHeartbeat(conn, packet)
+			continue
+		}
 
-		s.Handler(conn, packet)
+		go s.Handler(conn, packet, s)
 	}
+}
+
+func (s *TcpServer) sendHeartbeat(conn net.Conn, packet *roc.Packet) {
+	pt := roc.NewPacket(packet.GetId(), roc.PONG)
+
+	bt := s.Packer.Pack(pt)
+
+	conn.Write(bt)
 }
