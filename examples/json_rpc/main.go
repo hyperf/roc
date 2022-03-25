@@ -28,11 +28,7 @@ func main() {
 			return nil, &exception.Exception{Code: 404, Message: "The route is not defined."}
 		}
 
-		req := action.GetRequest()
-
-		server.Serializer.UnSerialize(packet.GetBody(), req)
-
-		return action.Handle(req)
+		return action.Handle(packet, server.Serializer)
 	})
 
 	serv := server.NewTcpServer("127.0.0.1:9501", handler)

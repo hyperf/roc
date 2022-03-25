@@ -1,14 +1,17 @@
 package router
 
-import "github.com/hyperf/roc/exception"
+import (
+	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/exception"
+	"github.com/hyperf/roc/serializer"
+)
 
 type SimpleRouter struct {
 	Routes map[string]ActionInterface
 }
 
 type ActionInterface interface {
-	Handle(req any) (any, exception.ExceptionInterface)
-	GetRequest() any
+	Handle(packet *roc.Packet, serializer serializer.SerializerInterface) (any, exception.ExceptionInterface)
 }
 
 func NewSimpleRouter() *SimpleRouter {
