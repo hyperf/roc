@@ -1,4 +1,4 @@
-package response
+package formatter
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 
 func Test_Json_Rpc_Response(t *testing.T) {
 	c.Convey("Json encode and decode must support T.", t, func() {
-		data := &JsonRPCResponse[string, string]{
+		data := &JsonRPCRequest[string, string]{
 			Id:      "123",
 			Path:    "/json_rpc/index",
 			Data:    "Hello World",
@@ -19,7 +19,7 @@ func Test_Json_Rpc_Response(t *testing.T) {
 		jsonData := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":\"Hello World\",\"context\":\"\"}"
 		c.So(string(ret), c.ShouldEqual, jsonData)
 
-		data2 := &JsonRPCResponse[string, string]{}
+		data2 := &JsonRPCRequest[string, string]{}
 		bt := []byte(jsonData)
 		json.Unmarshal(bt, data2)
 
