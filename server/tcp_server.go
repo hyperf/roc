@@ -6,6 +6,7 @@ import (
 	"github.com/hyperf/roc/log"
 	"github.com/hyperf/roc/serializer"
 	"go.uber.org/zap"
+	"io"
 	"net"
 )
 
@@ -55,8 +56,9 @@ func (s *TcpServer) handle(conn net.Conn) {
 		buf := make([]byte, 4)
 		_, err := conn.Read(buf)
 		if err != nil {
-			conn.Close()
-			log.Logger().Warn("Error reading", zap.Error(err))
+			if err != io.EOF {
+				log.Logger().Error("Error reading", zap.Error(err))
+			}
 			return
 		}
 
@@ -64,7 +66,9 @@ func (s *TcpServer) handle(conn net.Conn) {
 		buf = make([]byte, len32)
 		_, err = conn.Read(buf)
 		if err != nil {
-			log.Logger().Error("Error reading", zap.Error(err))
+			if err != io.EOF {
+				log.Logger().Error("Error reading", zap.Error(err))
+			}
 			return
 		}
 
