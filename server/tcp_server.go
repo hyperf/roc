@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/binary"
+	"fmt"
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/log"
 	"github.com/hyperf/roc/serializer"
@@ -38,7 +39,7 @@ func (s *TcpServer) Start() {
 		return
 	}
 
-	log.Logger().Info("Json RPC Server listening at " + s.Address)
+	fmt.Println("Json RPC Server listening at " + s.Address)
 
 	for {
 		conn, err := listener.Accept()
