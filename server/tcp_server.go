@@ -2,9 +2,10 @@ package server
 
 import (
 	"encoding/binary"
-	"fmt"
 	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/log"
 	"github.com/hyperf/roc/serializer"
+	"go.uber.org/zap"
 	"net"
 )
 
@@ -27,18 +28,21 @@ func NewTcpServer(addr string, handler Handler) *TcpServer {
 }
 
 func (s *TcpServer) Start() {
+	log.InitLogger()
+	defer log.Logger().Sync()
+
 	listener, err := net.Listen("tcp", s.Address)
 	if err != nil {
-		fmt.Println("Error listening", err.Error())
+		log.Logger().Fatal("Error listening", zap.Error(err))
 		return
 	}
 
-	fmt.Println("Json RPC Server listening at " + s.Address)
+	log.Logger().Info("Json RPC Server listening at " + s.Address)
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Error accepting", err.Error())
+			log.Logger().Info("Error accepting", zap.Error(err))
 			continue
 		}
 
@@ -51,7 +55,8 @@ func (s *TcpServer) handle(conn net.Conn) {
 		buf := make([]byte, 4)
 		_, err := conn.Read(buf)
 		if err != nil {
-			fmt.Println("Error reading", err.Error())
+			conn.Close()
+			log.Logger().Warn("Error reading", zap.Error(err))
 			return
 		}
 
@@ -59,7 +64,7 @@ func (s *TcpServer) handle(conn net.Conn) {
 		buf = make([]byte, len32)
 		_, err = conn.Read(buf)
 		if err != nil {
-			fmt.Println("Error reading", err.Error())
+			log.Logger().Error("Error reading", zap.Error(err))
 			return
 		}
 
