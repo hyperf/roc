@@ -4,6 +4,8 @@ import (
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/exception"
 	"github.com/hyperf/roc/formatter"
+	"github.com/hyperf/roc/log"
+	"go.uber.org/zap"
 	"net"
 )
 
@@ -16,28 +18,40 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 		serializer := server.Serializer
 		packer := server.Packer
 
-		serializer.UnSerialize(body, route)
-
-		ret, e := callback(route, packet, server)
+		err := serializer.UnSerialize(body, route)
 		var response any
-		if e != nil {
+
+		if err != nil {
+			log.Logger().Error("RPC_UnSerialize", zap.String("body", body))
 			response = &formatter.JsonRPCErrorResponse[any]{
 				Id: route.Id,
 				Error: &formatter.JsonRPCError{
-					Code:    e.GetCode(),
-					Message: e.GetMessage(),
+					Code:    exception.SERVER_ERROR,
+					Message: err.Error(),
 				},
 				Context: nil,
 			}
 		} else {
-			response = &formatter.JsonRPCResponse[any, any]{
-				Id:      route.Id,
-				Result:  ret,
-				Context: nil,
+			ret, e := callback(route, packet, server)
+			if e != nil {
+				response = &formatter.JsonRPCErrorResponse[any]{
+					Id: route.Id,
+					Error: &formatter.JsonRPCError{
+						Code:    e.GetCode(),
+						Message: e.GetMessage(),
+					},
+					Context: nil,
+				}
+			} else {
+				response = &formatter.JsonRPCResponse[any, any]{
+					Id:      route.Id,
+					Result:  ret,
+					Context: nil,
+				}
 			}
 		}
 
-		serializerd, err := serializer.Serialize(response)
+		serialized, err := serializer.Serialize(response)
 		if err != nil {
 			response = &formatter.JsonRPCErrorResponse[any]{
 				Id: route.Id,
@@ -47,14 +61,14 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 				Context: nil,
 			}
 
-			serializerd, err = serializer.Serialize(response)
+			serialized, err = serializer.Serialize(response)
 			if err != nil {
 				conn.Close()
 				return
 			}
 		}
 
-		bt := packer.Pack(roc.NewPacket(packet.GetId(), serializerd))
+		bt := packer.Pack(roc.NewPacket(packet.GetId(), serialized))
 
 		conn.Write(bt)
 	}
