@@ -53,6 +53,7 @@ func (s *TcpServer) Start() {
 }
 
 func (s *TcpServer) handle(conn net.Conn) {
+	defer conn.Close()
 	for {
 		buf := make([]byte, 4)
 		_, err := conn.Read(buf)

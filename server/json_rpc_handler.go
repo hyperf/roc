@@ -18,14 +18,14 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 
 		serializer.UnSerialize(body, route)
 
-		ret, exception := callback(route, packet, server)
+		ret, e := callback(route, packet, server)
 		var response any
-		if exception != nil {
+		if e != nil {
 			response = &formatter.JsonRPCErrorResponse[any]{
 				Id: route.Id,
 				Error: &formatter.JsonRPCError{
-					Code:    exception.GetCode(),
-					Message: exception.GetMessage(),
+					Code:    e.GetCode(),
+					Message: e.GetMessage(),
 				},
 				Context: nil,
 			}
