@@ -42,16 +42,23 @@ type FooSaveResult struct {
 	IsSuccess bool `json:"is_success"`
 }
 
-func (f *FooSaveAction) Handle(packet *roc.Packet, serializer serializer.SerializerInterface) (any, exception.ExceptionInterface) {
-	request := &formatter.JsonRPCRequest[*FooSaveRequest, any]{}
+func (f *FooSaveAction) getRequest(packet *roc.Packet, serializer serializer.SerializerInterface) (*FooSaveRequest, exception.ExceptionInterface) {
+	req := &formatter.JsonRPCRequest[*FooSaveRequest, any]{}
 
-	if err := serializer.UnSerialize(packet.GetBody(), request); err != nil {
+	if err := serializer.UnSerialize(packet.GetBody(), req); err != nil {
 		return nil, exception.NewDefaultException(err.Error())
 	}
 
-	fmt.Println(request.Data.ID, request.Data.Input.Name)
+	return req.Data, nil
+}
 
-	return &FooSaveResult{
-		IsSuccess: true,
-	}, nil
+func (f *FooSaveAction) Handle(packet *roc.Packet, serializer serializer.SerializerInterface) (any, exception.ExceptionInterface) {
+	request, e := f.getRequest(packet, serializer)
+	if e != nil {
+		return nil, e
+	}
+
+	fmt.Println(request.ID, request.Input.Name)
+
+	return &FooSaveResult{IsSuccess: true}, nil
 }
