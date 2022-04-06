@@ -52,11 +52,31 @@ func (s *TcpServer) Start() {
 	}
 }
 
+func (s *TcpServer) readAll(conn net.Conn, length int) ([]byte, error) {
+	ret := make([]byte, length)
+	recvLength := 0
+	var l int
+	var err error
+	for {
+		bt := make([]byte, length-recvLength)
+		l, err = conn.Read(bt)
+		if err != nil {
+			return nil, err
+		}
+
+		recvLength += l
+		ret = append(ret, bt...)
+		if recvLength >= length {
+			return ret, nil
+		}
+	}
+
+}
+
 func (s *TcpServer) handle(conn net.Conn) {
 	defer conn.Close()
 	for {
-		buf := make([]byte, 4)
-		_, err := conn.Read(buf)
+		buf, err := s.readAll(conn, 4)
 		if err != nil {
 			if err != io.EOF {
 				log.Logger().Error("Error reading", zap.Error(err))
@@ -65,8 +85,7 @@ func (s *TcpServer) handle(conn net.Conn) {
 		}
 
 		len32 := binary.BigEndian.Uint32(buf)
-		buf = make([]byte, len32)
-		_, err = conn.Read(buf)
+		buf, err = s.readAll(conn, int(len32))
 		if err != nil {
 			if err != io.EOF {
 				log.Logger().Error("Error reading", zap.Error(err))

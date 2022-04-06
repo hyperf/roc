@@ -4,8 +4,6 @@ import (
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/exception"
 	"github.com/hyperf/roc/formatter"
-	"github.com/hyperf/roc/log"
-	"go.uber.org/zap"
 	"net"
 )
 
@@ -22,7 +20,6 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 		var response any
 
 		if err != nil {
-			log.Logger().Error("RPC_UnSerialize", zap.String("body", body))
 			response = &formatter.JsonRPCErrorResponse[any]{
 				Id: route.Id,
 				Error: &formatter.JsonRPCError{
