@@ -53,7 +53,7 @@ func (s *TcpServer) Start() {
 }
 
 func (s *TcpServer) readAll(conn net.Conn, length int) ([]byte, error) {
-	ret := make([]byte, length)
+	ret := make([]byte, 0, length)
 	recvLength := 0
 	var l int
 	var err error
@@ -64,8 +64,8 @@ func (s *TcpServer) readAll(conn net.Conn, length int) ([]byte, error) {
 			return nil, err
 		}
 
+		ret = append(ret, bt[0:l]...)
 		recvLength += l
-		ret = append(ret, bt...)
 		if recvLength >= length {
 			return ret, nil
 		}
