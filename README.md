@@ -120,3 +120,9 @@ func main() {
 }
 
 ```
+
+## Related Repositories
+
+- [multiplex](https://github.com/hyperf/multiplex) Channel driven multiplexing connection for PHP.
+- [multiplex-socket](https://github.com/hyperf/multiplex-socket) Socket of channel driven multiplexing connection for PHP.
+- [rpc-multiplex](https://github.com/hyperf/rpc-multiplex) RPC of channel driven multiplexing connection for PHP.
