@@ -16,7 +16,7 @@ type Handler func(conn net.Conn, packet *roc.Packet, server *TcpServer)
 type TcpServer struct {
 	Address    string
 	Handler    Handler
-	Packer     *roc.Packer
+	Packer     roc.PackerInterface
 	Serializer serializer.SerializerInterface
 }
 

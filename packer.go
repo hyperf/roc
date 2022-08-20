@@ -6,7 +6,7 @@ import (
 
 type PackerInterface interface {
 	Pack(packet *Packet) []byte
-	UnPack(data string) *Packet
+	UnPack(bs []byte) *Packet
 }
 
 type Packer struct {
