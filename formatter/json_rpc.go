@@ -1,5 +1,11 @@
 package formatter
 
+import (
+	"encoding/json"
+	"errors"
+	"reflect"
+)
+
 type JsonRPCRequest[T any, T2 any] struct {
 	Id      string `json:"id"`
 	Path    string `json:"path"`
@@ -27,4 +33,38 @@ type JsonRPCErrorResponse[T2 any] struct {
 	Id      string        `json:"id"`
 	Error   *JsonRPCError `json:"error"`
 	Context T2            `json:"context"`
+}
+
+func FormatByteToRequest(data []byte, v any) error {
+	var raw []json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	typeOf := reflect.TypeOf(v)
+	valueOf := reflect.ValueOf(v)
+
+	if typeOf.Kind() != reflect.Ptr {
+		return errors.New("the type must be pointer")
+	}
+
+	typeOf = typeOf.Elem()
+	valueOf = valueOf.Elem()
+
+	if typeOf.Kind() != reflect.Struct {
+		return errors.New("the type must be struct")
+	}
+
+	for i := 0; i < typeOf.NumField(); i++ {
+		vv := reflect.New(typeOf.Field(i).Type).Interface()
+
+		err := json.Unmarshal(raw[i], &vv)
+		if err != nil {
+			return err
+		}
+
+		valueOf.Field(i).Set(reflect.ValueOf(vv).Elem())
+	}
+
+	return nil
 }

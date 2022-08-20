@@ -22,3 +22,7 @@ func NewClient() *Client {
 		ChannelManager: roc.NewChannelManager(),
 	}
 }
+
+func (c *Client) Send() {
+
+}
