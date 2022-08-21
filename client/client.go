@@ -1,7 +1,9 @@
 package client
 
 import (
+	"encoding/json"
 	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/formatter"
 	"github.com/hyperf/roc/serializer"
 	"net"
 )
@@ -26,19 +28,35 @@ func NewClient(conn net.Conn) *Client {
 	}
 }
 
-func (c *Client) Send(bt []byte) (uint32, error) {
-	id := c.IdGenerator.Generate()
+func (c *Client) SendPacket(p *roc.Packet) (uint32, error) {
+	bt := c.Packer.Pack(p)
 
 	_, err := c.Socket.Write(bt)
 	if err != nil {
 		return 0, err
 	}
 
-	return id, nil
+	return p.GetId(), nil
 }
 
-func (c *Client) SendPacket(p *roc.Packet) (uint32, error) {
-	bt := c.Packer.Pack(p)
+func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
+	uuid, err := formatter.GenerateId()
+	if err != nil {
+		return 0, err
+	}
 
-	return c.Send(bt)
+	req := &formatter.JsonRPCRequest[any, any]{
+		Id:   uuid,
+		Path: path,
+		Data: r,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		return 0, err
+	}
+
+	packet := roc.NewPacket(c.IdGenerator.Generate(), string(body))
+
+	return c.SendPacket(packet)
 }

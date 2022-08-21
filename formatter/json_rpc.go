@@ -1,8 +1,10 @@
 package formatter
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -33,6 +35,16 @@ type JsonRPCErrorResponse[T2 any] struct {
 	Id      string        `json:"id"`
 	Error   *JsonRPCError `json:"error"`
 	Context T2            `json:"context"`
+}
+
+func GenerateId() (string, error) {
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:]), nil
 }
 
 func FormatByteToRequest(data []byte, v any) error {

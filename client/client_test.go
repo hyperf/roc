@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/formatter"
 	c "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/mock"
 	"net"
@@ -73,13 +74,34 @@ func Test_New_Client(t *testing.T) {
 	})
 }
 
-func Test_Send(t *testing.T) {
-	c.Convey("NewClient must return Client.", t, func() {
+func Test_Send_Packet(t *testing.T) {
+	c.Convey("NewClient send packet must return packet id.", t, func() {
 		m := &ConnMock{}
 		m.On("Write", mock.Anything).Return(3, nil)
 		client := NewClient(m)
 
-		ret, _ := client.Send([]byte("sss"))
+		ret, _ := client.SendPacket(roc.NewPacket(1, "sss"))
+
+		c.So(1, c.ShouldEqual, ret)
+	})
+}
+
+type FooRequest struct {
+	Name   string
+	Gender uint8
+}
+
+func (f *FooRequest) MarshalJSON() ([]byte, error) {
+	return formatter.FormatRequestToByte(f)
+}
+
+func Test_Send_Request(t *testing.T) {
+	c.Convey("NewClient send request must return packet id.", t, func() {
+		m := &ConnMock{}
+		m.On("Write", mock.Anything).Return(3, nil)
+		client := NewClient(m)
+
+		ret, _ := client.SendRequest("/", &FooRequest{Name: "Roc", Gender: 1})
 
 		c.So(1, c.ShouldBeGreaterThanOrEqualTo, ret)
 	})
