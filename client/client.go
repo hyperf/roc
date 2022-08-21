@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 )
 
 type Client struct {
@@ -92,27 +93,31 @@ func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
 
 func (c *Client) Recv(id uint32, ret interface{}) exception.ExceptionInterface {
 	// TODO: 增加超时
-	bt, ok := <-c.ChannelManager.Get(id, false)
-	if !ok {
-		return exception.NewDefaultException("recv failed")
-	}
+	select {
+	case bt, ok := <-c.ChannelManager.Get(id, false):
+		if !ok {
+			return exception.NewDefaultException("recv failed")
+		}
 
-	req := &formatter.JsonRPCErrorResponse[any]{}
-	err := json.Unmarshal(bt, req)
-	if err != nil {
-		return exception.NewDefaultException(err.Error())
-	}
+		req := &formatter.JsonRPCErrorResponse[any]{}
+		err := json.Unmarshal(bt, req)
+		if err != nil {
+			return exception.NewDefaultException(err.Error())
+		}
 
-	if req.Error != nil {
-		return &exception.Exception{Code: req.Error.Code, Message: req.Error.Message}
-	}
+		if req.Error != nil {
+			return &exception.Exception{Code: req.Error.Code, Message: req.Error.Message}
+		}
 
-	err = json.Unmarshal(bt, ret)
-	if err != nil {
-		return exception.NewDefaultException(err.Error())
-	}
+		err = json.Unmarshal(bt, ret)
+		if err != nil {
+			return exception.NewDefaultException(err.Error())
+		}
 
-	return nil
+		return nil
+	case <-time.After(3 * time.Second):
+		return exception.NewDefaultException("recv timeout")
+	}
 }
 
 func (c *Client) FreshSocket() error {
