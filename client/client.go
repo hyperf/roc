@@ -3,8 +3,8 @@ package client
 import (
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/exception"
 	"github.com/hyperf/roc/formatter"
 	"github.com/hyperf/roc/serializer"
 	"io"
@@ -90,15 +90,26 @@ func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
 	return c.SendPacket(packet)
 }
 
-func (c *Client) Recv(id uint32, req interface{}) error {
+func (c *Client) Recv(id uint32, ret interface{}) exception.ExceptionInterface {
+	// TODO: 增加超时
 	bt, ok := <-c.ChannelManager.Get(id, false)
 	if !ok {
-		return errors.New("recv failed")
+		return exception.NewDefaultException("recv failed")
 	}
 
+	req := &formatter.JsonRPCErrorResponse[any]{}
 	err := json.Unmarshal(bt, req)
 	if err != nil {
-		return err
+		return exception.NewDefaultException(err.Error())
+	}
+
+	if req.Error != nil {
+		return &exception.Exception{Code: req.Error.Code, Message: req.Error.Message}
+	}
+
+	err = json.Unmarshal(bt, ret)
+	if err != nil {
+		return exception.NewDefaultException(err.Error())
 	}
 
 	return nil

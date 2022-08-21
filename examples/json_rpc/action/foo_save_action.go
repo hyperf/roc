@@ -60,5 +60,9 @@ func (f *FooSaveAction) Handle(packet *roc.Packet, serializer serializer.Seriali
 
 	fmt.Println(request.ID, request.Input.Name)
 
+	if request.Input.Name == "error" {
+		return nil, &exception.Exception{Code: 1000, Message: "Name is invalid"}
+	}
+
 	return &FooSaveResult{IsSuccess: true}, nil
 }

@@ -49,10 +49,19 @@ func main() {
 	id, _ := client.SendRequest("/foo/save", &req)
 
 	ret := &formatter.JsonRPCResponse[FooSaveResult, any]{}
-	err := client.Recv(id, &ret)
+	err := client.Recv(id, ret)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	fmt.Println(ret.Result.IsSuccess)
+
+	req = FooSaveRequest{ID: 1, Input: &FooSaveInput{Name: "error", Gender: 1}}
+	id, _ = client.SendRequest("/foo/save", &req)
+
+	ret = &formatter.JsonRPCResponse[FooSaveResult, any]{}
+	err = client.Recv(id, ret)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
