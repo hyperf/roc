@@ -44,6 +44,16 @@ func NewAddrClient(addr net.Addr) (*Client, error) {
 	return NewClient(conn), nil
 }
 
+func NewTcpClient(address string) (*Client, error) {
+	conn, err := net.Dial("tcp", address)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return NewClient(conn), nil
+}
+
 func (c *Client) SendPacket(p *roc.Packet) (uint32, error) {
 	bt := c.Packer.Pack(p)
 
