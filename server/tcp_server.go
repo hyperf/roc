@@ -70,7 +70,6 @@ func (s *TcpServer) readAll(conn net.Conn, length int) ([]byte, error) {
 			return ret, nil
 		}
 	}
-
 }
 
 func (s *TcpServer) handle(conn net.Conn) {

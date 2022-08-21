@@ -1,6 +1,8 @@
 package client
 
 import (
+	"errors"
+	"fmt"
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/formatter"
 	c "github.com/smartystreets/goconvey/convey"
@@ -65,7 +67,9 @@ func (c *ConnMock) SetWriteDeadline(t time.Time) error {
 
 func Test_New_Client(t *testing.T) {
 	c.Convey("NewClient must return Client.", t, func() {
-		client := NewClient(&ConnMock{})
+		m := &ConnMock{}
+		m.On("Read", mock.Anything).Return(0, errors.New("unit"))
+		client := NewClient(m)
 
 		packet := roc.NewPacket(1, "Hello World")
 		ret := client.Packer.Pack(packet)
@@ -78,6 +82,7 @@ func Test_Send_Packet(t *testing.T) {
 	c.Convey("NewClient send packet must return packet id.", t, func() {
 		m := &ConnMock{}
 		m.On("Write", mock.Anything).Return(3, nil)
+		m.On("Read", mock.Anything).Return(0, errors.New("unit"))
 		client := NewClient(m)
 
 		ret, _ := client.SendPacket(roc.NewPacket(1, "sss"))
@@ -99,10 +104,23 @@ func Test_Send_Request(t *testing.T) {
 	c.Convey("NewClient send request must return packet id.", t, func() {
 		m := &ConnMock{}
 		m.On("Write", mock.Anything).Return(3, nil)
+		m.On("Read", mock.Anything).Return(0, errors.New("unit"))
+
 		client := NewClient(m)
 
 		ret, _ := client.SendRequest("/", &FooRequest{Name: "Roc", Gender: 1})
 
 		c.So(1, c.ShouldBeGreaterThanOrEqualTo, ret)
+	})
+}
+
+func Test_Fresh(t *testing.T) {
+	c.Convey("NewClient must fresh Socket when disconnected.", t, func() {
+		conn, err := net.Dial("tcp", "127.0.0.1:9501")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		c.So("127.0.0.1:9501", c.ShouldBeGreaterThanOrEqualTo, conn.RemoteAddr().String())
 	})
 }
