@@ -20,6 +20,10 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Fetch Repository
         uses: actions/checkout@v2
+      - name: Setup JSON RPC Server
+        run: |
+          docker build . -f examples/json_rpc/Dockerfile -t json_rpc
+          docker run -p 9501:9501 --rm --name json_rpc_server -d json_rpc:latest
       - name: Run Test
         run: go test ./... -v -race
   ci_for_hyperf:

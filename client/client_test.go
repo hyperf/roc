@@ -115,7 +115,7 @@ func Test_Send_Request(t *testing.T) {
 }
 
 func Test_Fresh(t *testing.T) {
-	c.Convey("NewClient must fresh Socket when disconnected.", t, func() {
+	c.Convey("NewClient must Fresh Socket when disconnected.", t, func() {
 		conn, err := net.Dial("tcp", "127.0.0.1:9501")
 		if err != nil {
 			fmt.Println(err)

@@ -79,7 +79,7 @@ func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
 	return c.SendPacket(packet)
 }
 
-func (c *Client) fresh() error {
+func (c *Client) FreshSocket() error {
 	addr := c.Socket.RemoteAddr()
 
 	conn, err := net.Dial(addr.Network(), addr.String())
@@ -101,7 +101,7 @@ func (c *Client) Loop() {
 				if err != io.EOF {
 					log.Printf("Error reading %s", err)
 				}
-				_ = c.fresh()
+				_ = c.FreshSocket()
 				continue
 			}
 
@@ -111,7 +111,7 @@ func (c *Client) Loop() {
 				if err != io.EOF {
 					log.Printf("Error reading %s", err)
 				}
-				_ = c.fresh()
+				_ = c.FreshSocket()
 				continue
 			}
 
