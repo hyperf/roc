@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/formatter"
 	"github.com/hyperf/roc/serializer"
@@ -87,6 +88,20 @@ func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
 	packet := roc.NewPacket(id, string(body))
 
 	return c.SendPacket(packet)
+}
+
+func (c *Client) Recv(id uint32, req interface{}) error {
+	bt, ok := <-c.ChannelManager.Get(id, false)
+	if !ok {
+		return errors.New("recv failed")
+	}
+
+	err := json.Unmarshal(bt, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) FreshSocket() error {

@@ -16,6 +16,10 @@ type FooSaveRequest struct {
 	Input *FooSaveInput
 }
 
+type FooSaveResult struct {
+	IsSuccess bool `json:"is_success"`
+}
+
 type LocalAddr struct {
 }
 
@@ -44,9 +48,11 @@ func main() {
 	req := FooSaveRequest{ID: 1, Input: &FooSaveInput{Name: "limx", Gender: 1}}
 	id, _ := client.SendRequest("/foo/save", &req)
 
-	bt, ok := <-client.ChannelManager.Get(id, false)
-	if ok {
-		body := string(bt)
-		fmt.Println(body)
+	ret := &formatter.JsonRPCResponse[FooSaveResult, any]{}
+	err := client.Recv(id, &ret)
+	if err != nil {
+		fmt.Println(err)
 	}
+
+	fmt.Println(ret.Result.IsSuccess)
 }
