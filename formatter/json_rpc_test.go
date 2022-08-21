@@ -34,7 +34,7 @@ func Test_Json_Rpc_Response(t *testing.T) {
 type FooDataRequest struct {
 	Id     uint
 	Name   string
-	DataId FooDataId
+	DataId *FooDataId
 }
 
 type FooDataId struct {
@@ -49,12 +49,16 @@ func (f *FooDataRequest) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
-func Test_Json_Rpc_Data_Request(t *testing.T) {
+func (f *FooDataRequest) MarshalJSON() ([]byte, error) {
+	return FormatRequestToByte(f)
+}
 
-	c.Convey("Json encode and decode must support T.", t, func() {
+func Test_Format_Byte_To_Request(t *testing.T) {
+	c.Convey("FormatByteToRequest must work.", t, func() {
 		jsonData := "{\"id\":\"1\",\"path\":\"/json_rpc/index\",\"data\":[1,\"Hyperf\",{\"id\":123}],\"context\":[]}"
-		req := &JsonRPCRequest[FooDataRequest, any]{}
-		e := json.Unmarshal([]byte(jsonData), req)
+		req := &JsonRPCRequest[*FooDataRequest, any]{}
+		bt := []byte(jsonData)
+		e := json.Unmarshal(bt, req)
 		if e != nil {
 			fmt.Println(e)
 		}
@@ -62,5 +66,31 @@ func Test_Json_Rpc_Data_Request(t *testing.T) {
 		c.So(1, c.ShouldEqual, req.Data.Id)
 		c.So("Hyperf", c.ShouldEqual, req.Data.Name)
 		c.So(123, c.ShouldEqual, req.Data.DataId.Id)
+
+	})
+}
+
+func Test_Format_Request_To_Byte(t *testing.T) {
+	c.Convey("FormatRequestToByte must work.", t, func() {
+		req := &JsonRPCRequest[*FooDataRequest, any]{
+			Id:      "1",
+			Path:    "/json_rpc/index",
+			Data:    &FooDataRequest{Id: 1, Name: "Hyperf", DataId: &FooDataId{Id: 123}},
+			Context: []int{},
+		}
+		bt, e := json.Marshal(req)
+		if e != nil {
+			fmt.Println(e)
+		}
+
+		req2 := &JsonRPCRequest[*FooDataRequest, any]{}
+		e = json.Unmarshal(bt, req2)
+		if e != nil {
+			fmt.Println(e)
+		}
+
+		c.So(req2.Data.Id, c.ShouldEqual, req.Data.Id)
+		c.So(req2.Data.Name, c.ShouldEqual, req.Data.Name)
+		c.So(req2.Data.DataId.Id, c.ShouldEqual, req.Data.DataId.Id)
 	})
 }

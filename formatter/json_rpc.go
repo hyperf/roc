@@ -68,3 +68,32 @@ func FormatByteToRequest(data []byte, v any) error {
 
 	return nil
 }
+
+func FormatRequestToByte(v any) ([]byte, error) {
+	typeOf := reflect.TypeOf(v)
+	if typeOf.Kind() == reflect.Ptr {
+		typeOf = typeOf.Elem()
+	}
+
+	if typeOf.Kind() != reflect.Struct {
+		return nil, errors.New("the type must be struct")
+	}
+
+	var raw []json.RawMessage
+	valueOf := reflect.ValueOf(v)
+	if valueOf.Kind() == reflect.Ptr {
+		valueOf = valueOf.Elem()
+	}
+
+	for i := 0; i < typeOf.NumField(); i++ {
+		field := valueOf.Field(i)
+		bt, err := json.Marshal(field.Interface())
+		if err != nil {
+			return nil, err
+		}
+
+		raw = append(raw, bt)
+	}
+
+	return json.Marshal(raw)
+}
