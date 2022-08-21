@@ -12,7 +12,7 @@ WORKDIR /go/builder
 
 ADD . .
 
-RUN GOOS=linux CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix cgo -o main ./examples/json_rpc/main.go
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -installsuffix cgo -o main ./examples/json_rpc/main.go
 
 FROM scratch
 

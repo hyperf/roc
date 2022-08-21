@@ -88,6 +88,7 @@ func (c *Client) FreshSocket() error {
 		return err
 	}
 
+	_ = c.Socket.Close()
 	c.Socket = conn
 
 	return nil
