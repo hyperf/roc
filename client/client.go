@@ -91,7 +91,7 @@ func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
 	return c.SendPacket(packet)
 }
 
-func (c *Client) Recv(id uint32, ret interface{}) exception.ExceptionInterface {
+func (c *Client) Recv(id uint32, ret interface{}, option *RecvOption) exception.ExceptionInterface {
 	// TODO: 增加超时
 	select {
 	case bt, ok := <-c.ChannelManager.Get(id, false):
@@ -115,7 +115,7 @@ func (c *Client) Recv(id uint32, ret interface{}) exception.ExceptionInterface {
 		}
 
 		return nil
-	case <-time.After(3 * time.Second):
+	case <-time.After(option.Timeout):
 		return exception.NewDefaultException("recv timeout")
 	}
 }

@@ -50,7 +50,7 @@ func main() {
 	id, _ := client.SendRequest("/foo/save", &req)
 
 	ret := &formatter.JsonRPCResponse[FooSaveResult, any]{}
-	err := client.Recv(id, ret)
+	err := client.Recv(id, ret, cli.NewDefaultRecvOption())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -62,7 +62,7 @@ func main() {
 		id, _ = client.SendRequest("/foo/save", &req)
 
 		ret = &formatter.JsonRPCResponse[FooSaveResult, any]{}
-		err = client.Recv(id, ret)
+		err = client.Recv(id, ret, cli.NewDefaultRecvOption())
 		if err != nil {
 			fmt.Println(err)
 		}
