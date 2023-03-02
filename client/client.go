@@ -92,7 +92,6 @@ func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
 }
 
 func (c *Client) Recv(id uint32, ret interface{}, option *RecvOption) exception.ExceptionInterface {
-	// TODO: 增加超时
 	select {
 	case bt, ok := <-c.ChannelManager.Get(id, false):
 		if !ok {
