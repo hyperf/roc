@@ -13,10 +13,8 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 	return func(conn net.Conn, packet *roc.Packet, server *TcpServer) {
 		route := &formatter.JsonRPCRoute{}
 		body := packet.GetBody()
-		serializer := server.Serializer
-		packer := server.Packer
 
-		err := serializer.UnSerialize(body, route)
+		err := server.Serializer.UnSerialize(body, route)
 		var response any
 
 		if err != nil {
@@ -48,7 +46,7 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 			}
 		}
 
-		serialized, err := serializer.Serialize(response)
+		serialized, err := server.Serializer.Serialize(response)
 		if err != nil {
 			response = &formatter.JsonRPCErrorResponse[any]{
 				Id: route.Id,
@@ -58,14 +56,14 @@ func NewTcpServerHandler(callback JsonRPCHandler) Handler {
 				Context: nil,
 			}
 
-			serialized, err = serializer.Serialize(response)
+			serialized, err = server.Serializer.Serialize(response)
 			if err != nil {
 				conn.Close()
 				return
 			}
 		}
 
-		bt := packer.Pack(roc.NewPacket(packet.GetId(), serialized))
+		bt := server.Packer.Pack(roc.NewPacket(packet.GetId(), serialized))
 
 		conn.Write(bt)
 	}

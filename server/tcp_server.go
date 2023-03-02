@@ -92,8 +92,7 @@ func (s *TcpServer) handle(conn net.Conn) {
 			return
 		}
 
-		packer := &roc.Packer{}
-		packet := packer.UnPack(buf)
+		packet := s.Packer.UnPack(buf)
 		if packet.IsHeartbeat() {
 			go s.sendHeartbeat(conn, packet)
 			continue
