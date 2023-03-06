@@ -32,20 +32,20 @@ func (c *ChannelManager) Get(id uint32, initialize bool) chan []byte {
 	return nil
 }
 
-func (c ChannelManager) Close(id uint32) {
-	val, ok := c.channels.Load(id)
+func (c *ChannelManager) Close(id uint32) {
+	val, ok := c.channels.LoadAndDelete(id)
 	if ok {
 		close(val.(chan []byte))
 	}
 }
 
-func (c ChannelManager) GetChannels() *sync.Map {
+func (c *ChannelManager) GetChannels() *sync.Map {
 	return c.channels
 }
 
-func (c ChannelManager) Flush() {
+func (c *ChannelManager) Flush() {
 	c.channels.Range(func(key, value any) bool {
-		close(value.(chan []byte))
+		c.Close(key.(uint32))
 		return true
 	})
 }
