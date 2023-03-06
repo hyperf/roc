@@ -58,14 +58,32 @@ func main() {
 	fmt.Println(ret.Result.IsSuccess)
 
 	for {
-		req = FooSaveRequest{ID: 1, Input: &FooSaveInput{Name: "error", Gender: 1}}
-		id, _ = client.SendRequest("/foo/save", &req)
+		req := FooSaveRequest{ID: 1, Input: &FooSaveInput{Name: "error", Gender: 1}}
+		id, _ := client.SendRequest("/foo/save", &req)
 
-		ret = &formatter.JsonRPCResponse[FooSaveResult, any]{}
-		err = client.Recv(id, ret, cli.NewDefaultRecvOption())
+		ret := &formatter.JsonRPCResponse[FooSaveResult, any]{}
+		err := client.Recv(id, ret, cli.NewDefaultRecvOption())
 		if err != nil {
 			fmt.Println(err)
 		}
+
+		go func() {
+			req := FooSaveRequest{ID: 2, Input: &FooSaveInput{Name: "llmx", Gender: 1}}
+			id, _ := client.SendRequest("/foo/save", &req)
+
+			ret := &formatter.JsonRPCResponse[FooSaveResult, any]{}
+			err = client.Recv(id, ret, cli.NewDefaultRecvOption())
+			fmt.Println(ret.Result.IsSuccess, 1)
+		}()
+
+		go func() {
+			req := FooSaveRequest{ID: 3, Input: &FooSaveInput{Name: "lmx", Gender: 1}}
+			id, _ := client.SendRequest("/foo/save", &req)
+
+			ret := &formatter.JsonRPCResponse[FooSaveResult, any]{}
+			err = client.Recv(id, ret, cli.NewDefaultRecvOption())
+			fmt.Println(ret.Result.IsSuccess, 2)
+		}()
 
 		time.Sleep(time.Second)
 	}

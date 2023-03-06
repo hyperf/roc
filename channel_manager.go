@@ -1,11 +1,13 @@
 package roc
 
+import "sync"
+
 type ChannelManager struct {
-	channels map[uint32]chan []byte
+	channels *sync.Map
 }
 
 func NewChannelManager() *ChannelManager {
-	var channels = make(map[uint32]chan []byte)
+	var channels = new(sync.Map)
 	return &ChannelManager{
 		channels: channels,
 	}
@@ -16,32 +18,34 @@ func (_ *ChannelManager) Make(length uint32) chan []byte {
 }
 
 func (c *ChannelManager) Get(id uint32, initialize bool) chan []byte {
-	val, ok := c.channels[id]
+	val, ok := c.channels.Load(id)
 	if ok {
-		return val
+		return val.(chan []byte)
 	}
 
 	if initialize {
-		c.channels[id] = c.Make(1)
-		return c.channels[id]
+		ch := c.Make(1)
+		c.channels.Store(id, ch)
+		return ch
 	}
 
 	return nil
 }
 
 func (c ChannelManager) Close(id uint32) {
-	val, ok := c.channels[id]
+	val, ok := c.channels.Load(id)
 	if ok {
-		close(val)
+		close(val.(chan []byte))
 	}
 }
 
-func (c ChannelManager) GetChannels() map[uint32]chan []byte {
+func (c ChannelManager) GetChannels() *sync.Map {
 	return c.channels
 }
 
 func (c ChannelManager) Flush() {
-	for _, v := range c.channels {
-		close(v)
-	}
+	c.channels.Range(func(key, value any) bool {
+		close(value.(chan []byte))
+		return true
+	})
 }
