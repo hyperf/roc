@@ -83,7 +83,7 @@ func TestSendPacket(t *testing.T) {
 
 	ret, _ := client.SendPacket(roc.NewPacket(1, "sss"))
 
-	assert.Equal(t, 1, ret)
+	assert.Equal(t, uint32(1), ret)
 }
 
 type FooRequest struct {

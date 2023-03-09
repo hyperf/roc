@@ -7,11 +7,11 @@ import (
 
 func TestPacketNew(t *testing.T) {
 	packet := &Packet{1, "Hello World"}
-	assert.Equal(t, packet.GetId(), 1)
+	assert.Equal(t, packet.GetId(), uint32(1))
 	assert.Equal(t, packet.GetBody(), "Hello World")
 }
 
-func Test_Packet_Is_Heartbeat(t *testing.T) {
+func TestPacketIsHeartbeat(t *testing.T) {
 	packet := &Packet{0, PONG}
 	assert.True(t, packet.IsHeartbeat())
 

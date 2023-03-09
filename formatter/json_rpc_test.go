@@ -63,9 +63,9 @@ func TestFormatByteToRequest(t *testing.T) {
 		fmt.Println(e)
 	}
 
-	assert.Equal(t, 1, req.Data.Id)
+	assert.Equal(t, uint(1), req.Data.Id)
 	assert.Equal(t, "Hyperf", req.Data.Name)
-	assert.Equal(t, 123, req.Data.DataId.Id)
+	assert.Equal(t, uint64(123), req.Data.DataId.Id)
 }
 
 func TestFormatRequestToByte(t *testing.T) {

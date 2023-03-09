@@ -7,7 +7,7 @@ import (
 
 func TestIdGeneratorGenerate(t *testing.T) {
 	generator := &IdGenerator{id: 0}
-	assert.Equal(t, 1, generator.Generate())
+	assert.Equal(t, uint32(1), generator.Generate())
 	ch := make(chan uint32, 100)
 	for i := 0; i < 10; i++ {
 		go func() {
