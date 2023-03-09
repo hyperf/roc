@@ -27,7 +27,7 @@ func main() {
 		return action.Handle(packet, server.Serializer)
 	})
 
-	serv := server.NewTcpServer("0.0.0.0:8080", handler)
+	serv := server.NewTcpServer("0.0.0.0:9501", handler)
 
 	serv.Start()
 }
