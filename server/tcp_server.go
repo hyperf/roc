@@ -4,10 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/hyperf/roc"
-	"github.com/hyperf/roc/log"
 	"github.com/hyperf/roc/serializer"
-	"go.uber.org/zap"
 	"io"
+	"log"
 	"net"
 )
 
@@ -30,13 +29,9 @@ func NewTcpServer(addr string, handler Handler) *TcpServer {
 }
 
 func (s *TcpServer) Start() {
-	log.InitLogger()
-	defer log.Logger().Sync()
-
 	listener, err := net.Listen("tcp", s.Address)
 	if err != nil {
-		log.Logger().Fatal("Error listening", zap.Error(err))
-		return
+		log.Fatalf("[FATAL ERROR] %s", err)
 	}
 
 	fmt.Println("Json RPC Server listening at " + s.Address)
@@ -44,7 +39,7 @@ func (s *TcpServer) Start() {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Logger().Info("Error accepting", zap.Error(err))
+			log.Printf("[ERROR] %s", err)
 			continue
 		}
 
@@ -78,7 +73,7 @@ func (s *TcpServer) handle(conn net.Conn) {
 		buf, err := s.readAll(conn, 4)
 		if err != nil {
 			if err != io.EOF {
-				log.Logger().Error("Error reading", zap.Error(err))
+				log.Printf("[ERROR] %s", err)
 			}
 			return
 		}
@@ -87,7 +82,7 @@ func (s *TcpServer) handle(conn net.Conn) {
 		buf, err = s.readAll(conn, int(len32))
 		if err != nil {
 			if err != io.EOF {
-				log.Logger().Error("Error reading", zap.Error(err))
+				log.Printf("[ERROR] %s", err)
 			}
 			return
 		}
