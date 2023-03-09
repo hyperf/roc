@@ -2,60 +2,50 @@ package serializer
 
 import (
 	"github.com/hyperf/roc/formatter"
-	c "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
+	"reflect"
 	"testing"
 )
 
-func Test_Serializer_Serialize_And_UnSerialize(t *testing.T) {
-	c.Convey("Pack and UnPack must be interchangeable.", t, func() {
-		serializer := &JsonSerializer{}
-		data := &formatter.JsonRPCRequest[string, string]{
-			Id:      "123",
-			Path:    "/json_rpc/index",
-			Data:    "Hello World",
-			Context: "",
-		}
+func TestSerializerSerializeAndUnSerialize(t *testing.T) {
+	serializer := &JsonSerializer{}
+	data := &formatter.JsonRPCRequest[string, string]{
+		Id:      "123",
+		Path:    "/json_rpc/index",
+		Data:    "Hello World",
+		Context: "",
+	}
 
-		ret, _ := serializer.Serialize(data)
-		json := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":\"Hello World\",\"context\":\"\"}"
-		c.So(ret, c.ShouldEqual, json)
+	ret, _ := serializer.Serialize(data)
+	json := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":\"Hello World\",\"context\":\"\"}"
+	assert.Equal(t, json, ret)
 
-		data2 := &formatter.JsonRPCRequest[string, string]{}
-		serializer.UnSerialize(json, data2)
+	data2 := &formatter.JsonRPCRequest[string, string]{}
+	serializer.UnSerialize(json, data2)
 
-		c.So(data2.Id, c.ShouldEqual, data.Id)
-		c.So(data2.Path, c.ShouldEqual, data.Path)
-		c.So(data2.Data, c.ShouldEqual, data.Data)
-		c.So(data2.Context, c.ShouldEqual, data.Context)
-	})
+	assert.True(t, reflect.DeepEqual(data2, data))
 }
 
-func Test_Serializer_Serialize_And_UnSerialize_For_T(t *testing.T) {
-	c.Convey("Pack and UnPack must be interchangeable.", t, func() {
-		serializer := &JsonSerializer{}
-		type DataFoo struct {
-			Id   int    `json:"id"`
-			Name string `json:"name"`
-		}
+func TestSerializerSerializeAndUnSerializeForT(t *testing.T) {
+	serializer := &JsonSerializer{}
+	type DataFoo struct {
+		Id   int    `json:"id"`
+		Name string `json:"name"`
+	}
 
-		data := &formatter.JsonRPCRequest[*DataFoo, string]{
-			Id:      "123",
-			Path:    "/json_rpc/index",
-			Data:    &DataFoo{1, "Hyperf"},
-			Context: "Hello World",
-		}
+	data := &formatter.JsonRPCRequest[*DataFoo, string]{
+		Id:      "123",
+		Path:    "/json_rpc/index",
+		Data:    &DataFoo{1, "Hyperf"},
+		Context: "Hello World",
+	}
 
-		ret, _ := serializer.Serialize(data)
-		json := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":{\"id\":1,\"name\":\"Hyperf\"},\"context\":\"Hello World\"}"
-		c.So(ret, c.ShouldEqual, json)
+	ret, _ := serializer.Serialize(data)
+	json := "{\"id\":\"123\",\"path\":\"/json_rpc/index\",\"data\":{\"id\":1,\"name\":\"Hyperf\"},\"context\":\"Hello World\"}"
+	assert.Equal(t, ret, json)
 
-		data2 := &formatter.JsonRPCRequest[*DataFoo, string]{}
-		serializer.UnSerialize(json, data2)
+	data2 := &formatter.JsonRPCRequest[*DataFoo, string]{}
+	serializer.UnSerialize(json, data2)
 
-		c.So(data2.Id, c.ShouldEqual, data.Id)
-		c.So(data2.Path, c.ShouldEqual, data.Path)
-		c.So(data2.Data.Id, c.ShouldEqual, data.Data.Id)
-		c.So(data2.Data.Name, c.ShouldEqual, data.Data.Name)
-		c.So(data2.Context, c.ShouldEqual, data.Context)
-	})
+	assert.True(t, reflect.DeepEqual(data2, data))
 }

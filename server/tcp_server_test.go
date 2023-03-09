@@ -2,17 +2,15 @@ package server
 
 import (
 	"github.com/hyperf/roc"
-	c "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
 )
 
-func Test_New_Tcp_Server(t *testing.T) {
-	c.Convey("NewTcpServer must return TcpServer.", t, func() {
-		serv := NewTcpServer("127.0.0.1:9501", func(conn net.Conn, packet *roc.Packet, server *TcpServer) {
+func TestNewTcpServer(t *testing.T) {
+	serv := NewTcpServer("127.0.0.1:9501", func(conn net.Conn, packet *roc.Packet, server *TcpServer) {
 
-		})
-
-		c.So(serv.Address, c.ShouldEqual, "127.0.0.1:9501")
 	})
+
+	assert.Equal(t, serv.Address, "127.0.0.1:9501")
 }

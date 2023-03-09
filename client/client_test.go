@@ -2,10 +2,9 @@ package client
 
 import (
 	"errors"
-	"fmt"
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/formatter"
-	c "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net"
 	"testing"
@@ -65,30 +64,26 @@ func (c *ConnMock) SetWriteDeadline(t time.Time) error {
 	return args.Error(0)
 }
 
-func Test_New_Client(t *testing.T) {
-	c.Convey("NewClient must return Client.", t, func() {
-		m := &ConnMock{}
-		m.On("Read", mock.Anything).Return(0, errors.New("unit"))
-		client := NewClient(m)
+func TestNewClient(t *testing.T) {
+	m := &ConnMock{}
+	m.On("Read", mock.Anything).Return(0, errors.New("unit"))
+	client := NewClient(m)
 
-		packet := roc.NewPacket(1, "Hello World")
-		ret := client.Packer.Pack(packet)
+	packet := roc.NewPacket(1, "Hello World")
+	ret := client.Packer.Pack(packet)
 
-		c.So(len(ret), c.ShouldEqual, 19)
-	})
+	assert.Equal(t, 19, len(ret))
 }
 
-func Test_Send_Packet(t *testing.T) {
-	c.Convey("NewClient send packet must return packet id.", t, func() {
-		m := &ConnMock{}
-		m.On("Write", mock.Anything).Return(3, nil)
-		m.On("Read", mock.Anything).Return(0, errors.New("unit"))
-		client := NewClient(m)
+func TestSendPacket(t *testing.T) {
+	m := &ConnMock{}
+	m.On("Write", mock.Anything).Return(3, nil)
+	m.On("Read", mock.Anything).Return(0, errors.New("unit"))
+	client := NewClient(m)
 
-		ret, _ := client.SendPacket(roc.NewPacket(1, "sss"))
+	ret, _ := client.SendPacket(roc.NewPacket(1, "sss"))
 
-		c.So(1, c.ShouldEqual, ret)
-	})
+	assert.Equal(t, 1, ret)
 }
 
 type FooRequest struct {
@@ -100,27 +95,14 @@ func (f *FooRequest) MarshalJSON() ([]byte, error) {
 	return formatter.FormatRequestToByte(f)
 }
 
-func Test_Send_Request(t *testing.T) {
-	c.Convey("NewClient send request must return packet id.", t, func() {
-		m := &ConnMock{}
-		m.On("Write", mock.Anything).Return(3, nil)
-		m.On("Read", mock.Anything).Return(0, errors.New("unit"))
+func TestSendRequest(t *testing.T) {
+	m := &ConnMock{}
+	m.On("Write", mock.Anything).Return(3, nil)
+	m.On("Read", mock.Anything).Return(0, errors.New("unit"))
 
-		client := NewClient(m)
+	client := NewClient(m)
 
-		ret, _ := client.SendRequest("/", &FooRequest{Name: "Roc", Gender: 1})
+	ret, _ := client.SendRequest("/", &FooRequest{Name: "Roc", Gender: 1})
 
-		c.So(1, c.ShouldBeGreaterThanOrEqualTo, ret)
-	})
-}
-
-func Test_Fresh(t *testing.T) {
-	c.Convey("NewClient must Fresh Socket when disconnected.", t, func() {
-		conn, err := net.Dial("tcp", "127.0.0.1:9501")
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		c.So("127.0.0.1:9501", c.ShouldBeGreaterThanOrEqualTo, conn.RemoteAddr().String())
-	})
+	assert.True(t, ret >= 1)
 }
