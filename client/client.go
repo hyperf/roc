@@ -194,7 +194,7 @@ func (c *Client) Loop() {
 
 func (c *Client) readAll(length int) ([]byte, error) {
 	if c.Socket == nil {
-		return nil, SocketIsNil{}
+		return nil, SocketNil
 	}
 
 	ret := make([]byte, 0, length)
