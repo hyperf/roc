@@ -84,7 +84,7 @@ func (c *Client) SendPacket(p *roc.Packet) (uint32, error) {
 	return p.GetId(), nil
 }
 
-func (c *Client) SendRequest(path string, r json.Marshaler) (uint32, error) {
+func (c *Client) SendRequest(path string, r any) (uint32, error) {
 	uuid, err := formatter.GenerateId()
 	if err != nil {
 		return 0, err
