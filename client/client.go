@@ -3,14 +3,16 @@ package client
 import (
 	"encoding/binary"
 	"encoding/json"
-	"github.com/hyperf/roc"
-	"github.com/hyperf/roc/exception"
-	"github.com/hyperf/roc/formatter"
-	"github.com/hyperf/roc/serializer"
+	"errors"
 	"io"
 	"log"
 	"net"
 	"time"
+
+	"github.com/hyperf/roc"
+	"github.com/hyperf/roc/exception"
+	"github.com/hyperf/roc/formatter"
+	"github.com/hyperf/roc/serializer"
 )
 
 type Client struct {
@@ -20,6 +22,7 @@ type Client struct {
 	PushChan       chan string
 	ChannelManager *roc.ChannelManager
 	Socket         net.Conn
+	Addr           net.Addr
 }
 
 func NewClient(conn net.Conn) *Client {
@@ -30,6 +33,22 @@ func NewClient(conn net.Conn) *Client {
 		PushChan:       make(chan string, 65535),
 		ChannelManager: roc.NewChannelManager(),
 		Socket:         conn,
+		Addr:           conn.RemoteAddr(),
+	}
+
+	cli.Loop()
+	return cli
+}
+
+func NewLazyClient(conn net.Conn, Addr net.Addr) *Client {
+	cli := &Client{
+		Packer:         &roc.Packer{},
+		IdGenerator:    &roc.IdGenerator{},
+		Serializer:     &serializer.JsonSerializer{},
+		PushChan:       make(chan string, 65535),
+		ChannelManager: roc.NewChannelManager(),
+		Socket:         conn,
+		Addr:           Addr,
 	}
 
 	cli.Loop()
@@ -43,7 +62,7 @@ func NewAddrClient(addr net.Addr) (*Client, error) {
 		return nil, err
 	}
 
-	return NewClient(conn), nil
+	return NewLazyClient(conn, addr), nil
 }
 
 func NewTcpClient(address string) (*Client, error) {
@@ -53,10 +72,14 @@ func NewTcpClient(address string) (*Client, error) {
 		return nil, err
 	}
 
-	return NewClient(conn), nil
+	return NewLazyClient(conn, &TCPAddr{Addr: address}), nil
 }
 
 func (c *Client) SendPacket(p *roc.Packet) (uint32, error) {
+	if c.Socket == nil {
+		return 0, errors.New("the socket is nil")
+	}
+
 	bt := c.Packer.Pack(p)
 
 	_, err := c.Socket.Write(bt)
@@ -120,15 +143,16 @@ func (c *Client) Recv(id uint32, ret interface{}, option *RecvOption) exception.
 }
 
 func (c *Client) FreshSocket() error {
-	addr := c.Socket.RemoteAddr()
-
-	conn, err := net.Dial(addr.Network(), addr.String())
+	conn, err := net.Dial(c.Addr.Network(), c.Addr.String())
 
 	if err != nil {
 		return err
 	}
 
-	_ = c.Socket.Close()
+	if c.Socket != nil {
+		_ = c.Socket.Close()
+	}
+
 	c.Socket = conn
 
 	return nil
@@ -171,6 +195,10 @@ func (c *Client) Loop() {
 }
 
 func (c *Client) readAll(length int) ([]byte, error) {
+	if c.Socket == nil {
+		return nil, errors.New("the socket is nil")
+	}
+
 	ret := make([]byte, 0, length)
 	recvLength := 0
 	var l int
