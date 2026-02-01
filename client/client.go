@@ -56,21 +56,13 @@ func NewLazyClient(conn net.Conn, Addr net.Addr) *Client {
 }
 
 func NewAddrClient(addr net.Addr) (*Client, error) {
-	conn, err := net.Dial(addr.Network(), addr.String())
-
-	if err != nil {
-		return nil, err
-	}
+	conn, _ := net.Dial(addr.Network(), addr.String())
 
 	return NewLazyClient(conn, addr), nil
 }
 
 func NewTcpClient(address string) (*Client, error) {
-	conn, err := net.Dial("tcp", address)
-
-	if err != nil {
-		return nil, err
-	}
+	conn, _ := net.Dial("tcp", address)
 
 	return NewLazyClient(conn, &TCPAddr{Addr: address}), nil
 }

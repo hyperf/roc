@@ -2,13 +2,14 @@ package client
 
 import (
 	"errors"
+	"net"
+	"testing"
+	"time"
+
 	"github.com/hyperf/roc"
 	"github.com/hyperf/roc/formatter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"net"
-	"testing"
-	"time"
 )
 
 type ConnMock struct {
@@ -105,4 +106,10 @@ func TestSendRequest(t *testing.T) {
 	ret, _ := client.SendRequest("/", &FooRequest{Name: "Roc", Gender: 1})
 
 	assert.True(t, ret >= 1)
+}
+
+func TestNewLazyClient(t *testing.T) {
+	c, _ := NewTcpClient("127.0.0.1:12345")
+
+	assert.True(t, c.IdGenerator != nil)
 }
