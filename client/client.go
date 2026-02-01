@@ -15,6 +15,8 @@ import (
 	"github.com/hyperf/roc/serializer"
 )
 
+var SocketNil = errors.New("the socket is nil")
+
 type Client struct {
 	Packer         roc.PackerInterface
 	IdGenerator    roc.IdGeneratorInterface
@@ -69,7 +71,7 @@ func NewTcpClient(address string) (*Client, error) {
 
 func (c *Client) SendPacket(p *roc.Packet) (uint32, error) {
 	if c.Socket == nil {
-		return 0, errors.New("the socket is nil")
+		return 0, SocketNil
 	}
 
 	bt := c.Packer.Pack(p)
@@ -155,6 +157,10 @@ func (c *Client) Loop() {
 		for {
 			buf, err := c.readAll(4)
 			if err != nil {
+				if errors.Is(err, SocketNil) {
+					time.Sleep(5 * time.Second)
+				}
+
 				if err != io.EOF {
 					log.Printf("Error reading %s", err)
 				}
@@ -188,7 +194,7 @@ func (c *Client) Loop() {
 
 func (c *Client) readAll(length int) ([]byte, error) {
 	if c.Socket == nil {
-		return nil, errors.New("the socket is nil")
+		return nil, SocketIsNil{}
 	}
 
 	ret := make([]byte, 0, length)
